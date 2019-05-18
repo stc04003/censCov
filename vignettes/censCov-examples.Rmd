@@ -1,0 +1,102 @@
+---
+title: "Introduction to *censCov*"
+author: Sy Han (Steven) Chiou
+date: "`r Sys.Date()`"
+header-includes:
+  - \usepackage{bm}
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+bibliography: ../inst/bib/censCov.bib
+vignette: >
+  %\VignetteIndexEntry{Introduction to *censCov*}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}{inputenc}
+---
+
+```{r default, include = FALSE}
+knitr::opts_chunk$set(prompt = TRUE, comment = "", collapse = TRUE)
+```
+In this vignette, we demonstrate how to use the `thlm` function in
+__`censCov`__ package to fit linear regression model with censored covariate.
+
+## Notations
+Suppose the linear regression model: 
+$$ Y = \alpha_0 + \alpha_1X + \boldsymbol{\alpha}_2^\top \bf Z + \epsilon, $$
+where $Y$ is the response variable, $X$ is the covariate of interest which is subject to right censoring, 
+$\bf Z$ is a $p\times 1$ vector of additional covariates that are completely observed, 
+$\epsilon$ is the random error term with mean 0 and finite variance, 
+and the $\alpha$'s are the corresponding regression coefficients.
+We assume $epsilon$ is independent of $X$, $\bf Z$, and $C$, where
+$C$ is the right censoring that potentially censors $X$.
+The primary scientific interest is in the parameter $\alpha_1$, 
+which captures the association between $Y$ and $X$. 
+The `thlm` function provides 
+
+  1. a test for $H_o: \alpha_1 = 0$ againest its complement;
+  2. unbiased estimation of the regression coefficient of the censored covariate.
+
+## The `thlm` function
+The `thlm` function presents the threshold regression approaches for linear regression models with a covariate that is subject to random censoring.
+The threshold regression methods allow for immediate testing of the significance of the effect of a censored covariate.
+The __`censCov`__ package can be installed from CRAN with 
+```{R, eval = FALSE}
+install.packages("devtools")
+```
+or from GitHub with
+```{R, eval = FALSE}
+devtools::install_github("stc04003/censCov")
+```
+The arguments of the `thlm` function are as follows:
+```{R load}
+library(censCov)
+args(thlm)
+```
+
+  - `formula` is a formula expression in the form of `response ~ predictors`. The response variable is assumed to be fully observed. 
+  - `data` is an optional data frame, list or environment contains variables in the `formula` and the `subset` argument. If this is left unspecified, the variables are taken from the environment from which `thlm` is called.
+  - `cens` is an optional vector of censoring indicator for the possibily censored covariate of interest $X$ (0 = censored, 1 = uncensored). 
+  The censored covariate is assumed to be the first covariate specified in the `formula`.
+  - `subset`
+
+## Illustrative (simulated) data
+We will illustrate the usage of `thlm` with a simulated data that is generated as below:
+```{R simu}
+simDat <- function(n) {
+  X <- rexp(n, 3)
+  Z <- runif(n, 1, 6)
+  Y <- 0.5 + 0.5 * X - 0.5 * Z + rnorm(n, 0, .75)
+  cstime <- rexp(n, .75)
+  delta <- (X <= cstime) * 1
+  X <- pmin(X, cstime)
+  data.frame(Y = Y, X = X, Z = Z, delta = delta)
+}
+set.seed(1)
+head(dat <- simDat(200), 10)
+```
+The columns in the simulated dataset, `dat`, are
+
+  - `Y` is the response variable
+  - `X` is the covariate of interest when `delta = 1` or the right censored value when `delta = 0`
+  - `Z` is an additional covariate that is completely observed
+  - `delta` is the censoring indicator for `X`
+
+The average censoring percentage is about 20\%.
+
+## Methods
+The following methods for censored covariates are implemented in `thlm`.
+
+### Complete-cases (`method = "cc"`)
+When `method = "cc"`, `thlm` removes rows with `delta = 0` and 
+fits the linear model via `lm`.
+
+```{R}
+thlm(Y ~ X + Z, cens = delta, data = dat, method = "cc")
+```
+
+```{R}
+thlm(Y ~ X + Z, data = dat, subset = delta == 1)
+summary(lm(Y ~ X + Z, data = dat, subset = delta == 1))
+```

@@ -27,17 +27,16 @@
 #' significance of b1. Under the assumption that X is independent of Z
 #' given X*, b2 is equivalent to a2.
 #' 
-#' @param formula A formula expression,
-#' of the form \code{response ~ predictors}.
+#' @param formula A formula expression in the form \code{response ~ predictors}.
 #' The response variable is assumed to be fully observed.
 #' See the documentation of \code{lm} or \code{formula} for more details.
-#' @param data An optional data frame, list or environment contains variables in the \code{formula},
-#' or in the \code{subset} argument. If left unspecified, the variables are taken
+#' @param data An optional data frame list or environment contains variables in the \code{formula} and
+#' the \code{subset} argument. If left unspecified, the variables are taken
 #' from \code{environment(formula)}, typically the environment from which \code{thlm} is called.
-#' @param cens An optional vector of censoring indicator (0 = censoring, 1 = failure)
-#' for the censored covariate, which is assumed to be the first covariate specified in the
-#' \code{formula}. When \code{cens} is left unspecified or a vector of 1's,
-#' the model assumes all covariates are fully observed and the model reduced to simple
+## #' @param cens An optional vector of censoring indicator (0 = censored, 1 = uncensored)
+## #' for the censored covariate, which is assumed to be the first covariate specified in the
+## #' \code{formula}. When \code{cens} is left unspecified or a vector of 1's,
+## #' the model assumes all covariates are fully observed and the model reduced to simple
 #' linear regression, i.e. \code{lm}.
 #' @param subset An optional vector specifying a subset of observations to be
 #' used in the fitting process.
@@ -119,7 +118,7 @@
 #' ## display all
 #' thlm(Y ~ X + Z, cens = delta, data = dat, method = "all", B = 100)
 
-thlm <- function(formula, data, cens = NULL, subset, method = "cc", B = 0,
+thlm <- function(formula, data, subset, method = "cc", B = 0,
                  x.upplim = NULL, t0 = NULL, control = thlm.control()) {
     Call <- match.call()
     mnames <- c("", "formula", "data", "subset", "cens")
@@ -129,19 +128,22 @@ thlm <- function(formula, data, cens = NULL, subset, method = "cc", B = 0,
     mcall[[1]] <- as.name("model.frame")
     obj <- eval(mcall, parent.frame())
     y <- as.numeric(model.extract(obj, "response"))
-    cens <- as.numeric(model.extract(obj, "cens"))
-    if (is.null(cens) | formula[[3]] == 1 | all(cens == 1)) {
+    nSurv <- sapply(1:ncol(obj), function(x) class(obj[,x]))
+    covNames <- all.vars(formula)[-c(1, which(nSurv == "Surv") + 1)]
+    if (sum(nSurv == "Surv") > 1) stop("The current version allows at most ONE censored covariate.")
+    if (sum(nSurv == "Surv") == 0) {
         out <- lm(formula, data = obj)
         method <- "lm"
-    } else {
-        mat <- as.matrix(model.matrix(attr(obj, "terms"), obj))
-        mat <- mat[, apply(mat, 2, function(x) !all(x == 1))]
-        u <- mat[,1]
-        z <- as.matrix(mat[,-1])
+    }
+    if (sum(nSurv == "Surv") == 1) {
+        tmp <- do.call(cbind, sapply(1:ncol(obj), function(x) as.matrix(obj[,x])))
+        cens <- tmp$status
+        u <- tmp$time
+        z <- tmp[, attr(tmp, "dimnames")[[2]] == ""][,-1]
         if (method %in% c("cc", "complete cases")) {
             ## out <- lm(formula, subset = cens == 1)
             out <- cc.reg(y, u, cens, z)
-            names(out$a2) <- names(out$a2.sd) <- colnames(mat)[-1]
+            names(out$a2) <- names(out$a2.sd) <- covNames
             method <- "clm"
         }
         if (method %in% c("reverse", "rev", "reverse survival")) {
@@ -151,7 +153,7 @@ thlm <- function(formula, data, cens = NULL, subset, method = "cc", B = 0,
         if (method %in% c("deletion", "deletion threshold", "dt")) {
             op2 <- par(mar = c(3.5, 3.5, 2.5, 2.5))
             out <- threshold.reg.m1(y, u, cens, z, x.upplim, t0, control)
-            names(out$a2) <- names(out$a2.sd) <- colnames(mat)[-1]
+            names(out$a2) <- names(out$a2.sd) <- covNames
             method <- "dt"
             out$a1.sd <- NA
             par(op2)
@@ -159,7 +161,7 @@ thlm <- function(formula, data, cens = NULL, subset, method = "cc", B = 0,
         if (method %in% c("complete", "complete threshold", "ct")) {
             op2 <- par(mar = c(3.5, 3.5, 2.5, 2.5))
             out <- threshold.reg.m2(y, u, cens, z, x.upplim, t0, control)
-            names(out$a2) <- names(out$a2.sd) <- colnames(mat)[-1]
+            names(out$a2) <- names(out$a2.sd) <- covNames
             method <- "ct"
             out$a1.sd <- NA
             par(op2)
@@ -167,14 +169,14 @@ thlm <- function(formula, data, cens = NULL, subset, method = "cc", B = 0,
         if (method == "all") {
             out <- NULL
             out$cc <- cc.reg(y, u, cens, z)
-            names(out$cc$a2) <- names(out$cc$a2.sd) <- colnames(mat)[-1]
+            names(out$cc$a2) <- names(out$cc$a2.sd) <- covNames
             out$rev <- rev.surv.reg(y, u, cens, z)
             op2 <- par(mfrow = c(2, 1), mar = c(3.5, 3.5, 2.5, 2.5))
             out$dt <- threshold.reg.m1(y, u, cens, z, x.upplim, t0, control)
-            names(out$dt$a2) <- names(out$dt$a2.sd) <- colnames(mat)[-1]
+            names(out$dt$a2) <- names(out$dt$a2.sd) <- covNames
             out$dt$a1.sd <- NA
             out$ct <- threshold.reg.m2(y, u, cens, z, x.upplim, t0, control)
-            names(out$ct$a2) <- names(out$ct$a2.sd) <- colnames(mat)[-1]
+            names(out$ct$a2) <- names(out$ct$a2.sd) <- covNames
             out$ct$a1.sd <- NA
             par(op2)
         }

@@ -4,23 +4,17 @@
 \alias{thlm}
 \title{Threshold regression with a censored covariate}
 \usage{
-thlm(formula, data, cens = NULL, subset, method = "cc", B = 0,
-  x.upplim = NULL, t0 = NULL, control = thlm.control())
+thlm(formula, data, subset, method = "cc", B = 0, x.upplim = NULL,
+  t0 = NULL, control = thlm.control())
 }
 \arguments{
-\item{formula}{A formula expression,
-of the form \code{response ~ predictors}.
+\item{formula}{A formula expression in the form \code{response ~ predictors}.
 The response variable is assumed to be fully observed.
 See the documentation of \code{lm} or \code{formula} for more details.}
 
-\item{data}{An optional data frame, list or environment contains variables in the \code{formula},
-or in the \code{subset} argument. If left unspecified, the variables are taken
-from \code{environment(formula)}, typically the environment from which \code{thlm} is called.}
-
-\item{cens}{An optional vector of censoring indicator (0 = censoring, 1 = failure)
-for the censored covariate, which is assumed to be the first covariate specified in the
-\code{formula}. When \code{cens} is left unspecified or a vector of 1's,
-the model assumes all covariates are fully observed and the model reduced to simple
+\item{data}{An optional data frame list or environment contains variables in the \code{formula} and
+the \code{subset} argument. If left unspecified, the variables are taken
+from \code{environment(formula)}, typically the environment from which \code{thlm} is called.
 linear regression, i.e. \code{lm}.}
 
 \item{subset}{An optional vector specifying a subset of observations to be

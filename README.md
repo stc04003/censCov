@@ -24,6 +24,10 @@ You can install `censCov` from github with:
 devtools::install_github("stc04003/censCov")
 ```
 
+### Getting Started
+
+The package [vignette](https://www.sychiou.com/censCov/index.html) provides a quick demonstration for the basic usage of the main functions.
+
 ### References:
 
 Qian, J., Chiou, S.H., Maye, J.E., Atem, F., Johnson, K.A. and Betensky, R.A. (2018). Threshold regression to accommodate a censored covariate, *Biometrics*, **74**(4): 1261--1270.
