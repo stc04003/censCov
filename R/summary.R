@@ -1,4 +1,4 @@
-#' export
+#' @export
 summary.thlm <- function(object, ...) {
     if (class(object) != "thlm") stop("Must be a thlm object")
     if (object$method == "lm") {

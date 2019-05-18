@@ -11,7 +11,7 @@
 #' the method reduces to the simple linear regression.
 #'
 #' The model assumes the linear regression model:
-#' \deqn{Y = a0 + a1X + a2Z + e,} where X is the covariate of interest which
+#' \deqn{Y = a_0 + a_1X + a_2Z + e,} where X is the covariate of interest which
 #' is subject to right censoring, Z is a covariate matrix that are fully
 #' observed, Y is the response variable, and e is an independent randon
 #' error term with mean 0 and finite variance.
@@ -22,26 +22,26 @@
 #' but easy-to-evaluate test is performed. Namely, given a threshold
 #' t*, we define a derived binary covariate, X*, such that X* = 1 when X
 #' > t* and X* = 0 when X is uncensored and X < t*. The proposed linear
-#' regression can be expressed as \deqn{E(Y|X*, Z) = b0 + b1X* +
-#' b2Z.} The proposed hypothesis test of association can be tested by the
+#' regression can be expressed as \deqn{E(Y|X^\ast, Z) = b_0 + b_1X^\ast +
+#' b_2Z.} The proposed hypothesis test of association can be tested by the
 #' significance of b1. Under the assumption that X is independent of Z
 #' given X*, b2 is equivalent to a2.
 #' 
-#' @param formula a formula expression,
+#' @param formula A formula expression,
 #' of the form \code{response ~ predictors}.
 #' The response variable is assumed to be fully observed.
 #' See the documentation of \code{lm} or \code{formula} for more details.
-#' @param data an optional data frame, list or environment contains variables in the \code{formula},
+#' @param data An optional data frame, list or environment contains variables in the \code{formula},
 #' or in the \code{subset} argument. If left unspecified, the variables are taken
 #' from \code{environment(formula)}, typically the environment from which \code{thlm} is called.
-#' @param cens an optional vector of censoring indicator (0 = censoring, 1 = failure)
+#' @param cens An optional vector of censoring indicator (0 = censoring, 1 = failure)
 #' for the censored covariate, which is assumed to be the first covariate specified in the
 #' \code{formula}. When \code{cens} is left unspecified or a vector of 1's,
 #' the model assumes all covariates are fully observed and the model reduced to simple
 #' linear regression, i.e. \code{lm}.
-#' @param subset an optional vector specifying a subset of observations to be
+#' @param subset An optional vector specifying a subset of observations to be
 #' used in the fitting process.
-#' @param method a character string specifying the threshold regression methods to be used.
+#' @param method A character string specifying the threshold regression methods to be used.
 #' The following are permitted:
 #' \describe{
 #'   \item{\code{cc}}{for complete-cases regression}
@@ -50,18 +50,18 @@
 #'   \item{\code{ct}}{for complete threshold regression}
 #'   \item{\code{all}}{for all four approaches}
 #' }
-#' @param B a numeric value specifies the bootstrap size for estimating
+#' @param B A numeric value specifies the bootstrap size for estimating
 #' the standard deviation of regression coefficient for the censored
 #' covariate when \code{method = "dt"} or \code{"ct"}.
 #' When \code{B = 0}, only the beta estimate will be displayed.
-#' @param x.upplim an optional numeric value specifies the upper support
+#' @param x.upplim An optional numeric value specifies the upper support
 #' of censored covariate. When left unspecified, the maximum of the
 #' censored covariate will be used.
-#' @param t0 an optional numeric value specifies the threshold when
+#' @param t0 An optional numeric value specifies the threshold when
 #' \code{method = "dt"} or \code{"ct"}.
 #' When left unspecified, an optimal threshold will be determined to optimize test power
 #' using the proposed procedure in Qian et al (2018).
-#' @param control a list of parameters. The parameters are
+#' @param control A list of parameters. The parameters are
 #' \describe{
 #'   \item{\code{t0.interval}}{controls the end points of the interval to be searched for
 #' the optimal threshold when \code{t0} is left unspecified}
@@ -71,7 +71,9 @@
 #' }
 #'
 #' @importFrom stats approx coef ecdf lm model.extract model.matrix optimize printCoefmat
-#' @importFrom stats loess.smooth
+#' @importFrom stats loess.smooth pnorm qnorm runif sd
+#' @importFrom survival survfit coxph Surv
+#' @importFrom graphics abline legend lines mtext par plot title
 #' 
 #' @export
 #' @references Qian, J., Chiou, S.H., Maye, J.E., Atem, F., Johnson, K.A. and Betensky, R.A. (2018)
