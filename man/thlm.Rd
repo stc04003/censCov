@@ -10,12 +10,13 @@ thlm(formula, data, subset, method = "cc", B = 0, x.upplim = NULL,
 \arguments{
 \item{formula}{A formula expression in the form \code{response ~ predictors}.
 The response variable is assumed to be fully observed.
-See the documentation of \code{lm} or \code{formula} for more details.}
+The function \code{thlm} can accommodate at most one covaraite subject to independent right censoring. 
+The censored covariate is entered as an \code{Surv} object; see \code{survival::Surv} for more detail.
+When all the covariates are uncensored, the \code{thlm} function fits the \code{lm} object instead.}
 
 \item{data}{An optional data frame list or environment contains variables in the \code{formula} and
 the \code{subset} argument. If left unspecified, the variables are taken
-from \code{environment(formula)}, typically the environment from which \code{thlm} is called.
-linear regression, i.e. \code{lm}.}
+from \code{environment(formula)}, typically the environment from which \code{thlm} is called.}
 
 \item{subset}{An optional vector specifying a subset of observations to be
 used in the fitting process.}
@@ -101,19 +102,19 @@ thlm(Y ~ X + Z, cens = delta, data = dat)
 thlm(Y ~ X + Z, data = dat, subset = delta == 1) ## same results
 
 ## reverse survival regression
-thlm(Y ~ X + Z, cens = delta, data = dat, method = "reverse")
+thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "reverse")
 
 ## threshold regression without bootstrap
-thlm(Y ~ X + Z, cens = delta, data = dat, method = "dt")
-thlm(Y ~ X + Z, cens = delta, data = dat, method = "ct", control =
+thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "dt")
+thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "ct", control =
 list(t0.interval = c(0.2, 0.6), t0.plot = FALSE))
 
 ## threshold regression with bootstrap
-thlm(Y ~ X + Z, cens = delta, data = dat, method = "dt", B = 100)
-thlm(Y ~ X + Z, cens = delta, data = dat, method = "ct", B = 100)
+thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "dt", B = 100)
+thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "ct", B = 100)
 
 ## display all
-thlm(Y ~ X + Z, cens = delta, data = dat, method = "all", B = 100)
+thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "all", B = 100)
 }
 \references{
 Qian, J., Chiou, S.H., Maye, J.E., Atem, F., Johnson, K.A. and Betensky, R.A. (2018)
