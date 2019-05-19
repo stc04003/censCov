@@ -4,40 +4,42 @@
 \alias{thlm}
 \title{Threshold regression with a censored covariate}
 \usage{
-thlm(formula, data, subset, method = "cc", B = 0, x.upplim = NULL,
+thlm(formula, data, method = c("cc", "reverse", "deletion-threshold",
+  "complete-threshold", "all"), B = 0, subset, x.upplim = NULL,
   t0 = NULL, control = thlm.control())
 }
 \arguments{
 \item{formula}{A formula expression in the form \code{response ~ predictors}.
 The response variable is assumed to be fully observed.
-The function \code{thlm} can accommodate at most one covaraite subject to independent right censoring. 
-The censored covariate is entered as an \code{Surv} object; see \code{survival::Surv} for more detail.
-When all the covariates are uncensored, the \code{thlm} function fits the \code{lm} object instead.}
+The \code{thlm} function can accommodate at most one censored covariate,
+which is entered as an \code{Surv} object; see \code{survival::Surv} for more detail.
+When all the covariates are uncensored, the \code{thlm} function returns a \code{lm} object.}
 
 \item{data}{An optional data frame list or environment contains variables in the \code{formula} and
 the \code{subset} argument. If left unspecified, the variables are taken
 from \code{environment(formula)}, typically the environment from which \code{thlm} is called.}
 
-\item{subset}{An optional vector specifying a subset of observations to be
-used in the fitting process.}
-
 \item{method}{A character string specifying the threshold regression methods to be used.
 The following are permitted:
 \describe{
   \item{\code{cc}}{for complete-cases regression}
-  \item{\code{rev}}{for reverse survival regression}
-  \item{\code{dt}}{for deletion threshold regression}
-  \item{\code{ct}}{for complete threshold regression}
+  \item{\code{reverse}}{for reverse survival regression}
+  \item{\code{deletion-threshold}}{for deletion threshold regression}
+  \item{\code{complete-threshold}}{for complete threshold regression}
   \item{\code{all}}{for all four approaches}
 }}
 
 \item{B}{A numeric value specifies the bootstrap size for estimating
 the standard deviation of regression coefficient for the censored
-covariate when \code{method = "dt"} or \code{"ct"}.
+covariate when \code{method = "deletion-threshold"} or
+\code{method = "complete-threshold"}.
 When \code{B = 0}, only the beta estimate will be displayed.}
 
+\item{subset}{An optional vector specifying a subset of observations to be
+used in the fitting process.}
+
 \item{x.upplim}{An optional numeric value specifies the upper support
-of censored covariate. When left unspecified, the maximum of the
+of the censored covariate. When left unspecified, the maximum of the
 censored covariate will be used.}
 
 \item{t0}{An optional numeric value specifies the threshold when
@@ -94,24 +96,24 @@ simDat <- function(n) {
 set.seed(0)
 dat <- simDat(200)
 
+library(survival)
 ## Falsely assumes all covariates are free of censoring
 thlm(Y ~ X + Z, data = dat)
 
 ## Complete cases regression
-thlm(Y ~ X + Z, cens = delta, data = dat)
-thlm(Y ~ X + Z, data = dat, subset = delta == 1) ## same results
+thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "cc")
 
 ## reverse survival regression
-thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "reverse")
+thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "rev")
 
 ## threshold regression without bootstrap
-thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "dt")
-thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "ct", control =
+thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "del")
+thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "com", control =
 list(t0.interval = c(0.2, 0.6), t0.plot = FALSE))
 
 ## threshold regression with bootstrap
-thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "dt", B = 100)
-thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "ct", B = 100)
+thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "del", B = 100)
+thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "com", B = 100)
 
 ## display all
 thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "all", B = 100)

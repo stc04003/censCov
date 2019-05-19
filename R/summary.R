@@ -10,7 +10,8 @@ summary.thlm <- function(object, ...) {
     }
     if (object$method == "clm") {
         ## cat(paste("\nComplete-case regression\n"))
-        tab <- as.data.frame(cbind(Estimate = c(object$a1, object$a2), StdErr = c(object$a1.sd, object$a2.sd)))
+        tab <- as.data.frame(cbind(Estimate = c(object$a1, object$a2),
+                                   StdErr = c(object$a1.sd, object$a2.sd)))
         tab$z.value <- tab$Estimate / tab$StdErr
         tab$p.value <- with(tab, 2 * pnorm(-abs(Estimate) / StdErr))
         rownames(tab) <- object$names[-1]
@@ -125,8 +126,8 @@ print.thlm <- function(x, ...) {
     cat("\n Call: ")
     print(x$Call)
     if (x$method %in% c("clm", "rev")) {
-        cat("\n Hypothesis test of association, H0: a1 = 0\n")
-        cat(paste("p-value =",
+        cat("\n Hypothesis test of association\n")
+        cat(paste("H0: a1 = 0, p-value =",
                   sprintf("%.4f", round(2 * pnorm(-abs(x$a1) / x$a1.sd), 4)), "\n"))
     }
     if (x$method %in% c("dt", "ct")) {

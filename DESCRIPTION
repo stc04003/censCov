@@ -2,17 +2,16 @@ Package: censCov
 Type: Package
 Title: Linear Regression with a Randomly Censored Covariate
 Version: 1.0.1
-Date: 2019-05-20
+Date: 2019-05-19
 Author: Jing Qian, Sy Han (Steven) Chiou
 Maintainer: Jing Qian <qian@schoolph.umass.edu>
-Description: Implementations of threshold regression approaches for linear
-	     regression models with a covariate subject to random censoring,
-	     including deletion threshold regression and completion threshold regression.
-	     Reverse survival regression, which flip the role of response variable and the
-	     covariate, is also considered.
+Description: Implementations of threshold regression approaches for linear regression models with a covariate subject to random censoring, including deletion threshold regression and completion threshold regression. Reverse survival regression, which flip the role of response variable and the covariate, is also considered. Detailed descriptions of these methods can be found in Qian et al. (2018) <doi:10.1111/biom.12922>.
+Depends: R (>= 3.4.0)
 License: GPL (>= 3)
 Imports: survival
 Encoding: UTF-8
+URL: http://github.com/stc04003/censCov
+BugReports: http://github.com/stc04003/censCov/issues
 LazyLoad: yes
 NeedsCompilation: no
 Repository: CRAN

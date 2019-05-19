@@ -20,7 +20,8 @@ vignette: >
 knitr::opts_chunk$set(prompt = TRUE, comment = "", collapse = TRUE)
 ```
 In this vignette, we demonstrate how to use the `thlm` function in
-__`censCov`__ package to fit linear regression model with censored covariate.
+__`censCov`__ package to fit linear regression model with censored covariate
+using the methods proposed in @qian2018threshold.
 
 ## Notations
 Suppose the linear regression model: 
@@ -54,12 +55,31 @@ The arguments of the `thlm` function are as follows:
 library(censCov)
 args(thlm)
 ```
-
+```{R echo = FALSE}
+library(survival)
+```
   - `formula` is a formula expression in the form of `response ~ predictors`. The response variable is assumed to be fully observed. 
+  The `thlm` function can accommodate at most one censored covariate, which is entered in the formula as an `Surv` object; 
+  see `survival::Surv` for more detial.
+  If all the covariates are uncensored, the `thlm` function returns a `lm` object.
   - `data` is an optional data frame, list or environment contains variables in the `formula` and the `subset` argument. If this is left unspecified, the variables are taken from the environment from which `thlm` is called.
-  - `cens` is an optional vector of censoring indicator for the possibily censored covariate of interest $X$ (0 = censored, 1 = uncensored). 
-  The censored covariate is assumed to be the first covariate specified in the `formula`.
-  - `subset`
+  - `method` is a character string specifying the threshold regression methods to be used. The following are permitted:
+    - `cc` for complete-cases regression
+    - `reverse` for complete-cases regression
+    - `deletion-threshold` for complete-cases regression
+    - `complete-threshold` for complete-cases regression
+    - `all` for complete-cases regression
+  - `B` is a numeric value specifies the bootstrap size for estimating the standard error of the regression coefficient for the
+  censored covariate when `method = "deletion-threshold"` or `method = "complete-threshold"`.
+  When `B = 0` (default), only the beta estimate will be displayed.
+  - `subset` is an optional vector specifying a subset of observations to be used in the fitting process.
+  - `x.upplim` is an optional number value specifies the upper support of the censored covariate. 
+  When left unspecified, the maximum of the censored covariate will be used.
+  - `t0` is an optional numeric value specifies the threshold when `method = "deletion-threshold"` or `method = "complete-threshold"`.
+  When left unspecified, an optimal threshold will be determined to optimize test power.
+  - `control` is a list of threshold parameters including:
+    - `t0.interval` controls the end points of the interval to be searched for the optimal threshold when `t0` is left unspecified
+    - `t0.plot` controls whether the objective function will be plotted. When t0.plot is ture, both the raw `t0.plot` values and the smoothed estimates (using local polynomial regression fitting) are plotted.
 
 ## Illustrative (simulated) data
 We will illustrate the usage of `thlm` with a simulated data that is generated as below:
@@ -88,15 +108,38 @@ The average censoring percentage is about 20\%.
 ## Methods
 The following methods for censored covariates are implemented in `thlm`.
 
-### Complete-cases (`method = "cc"`)
+### Complete cases
 When `method = "cc"`, `thlm` removes rows with `delta = 0` and 
 fits the linear model via `lm`.
-
 ```{R}
-thlm(Y ~ X + Z, cens = delta, data = dat, method = "cc")
+thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "cc")
 ```
-
+or
 ```{R}
 thlm(Y ~ X + Z, data = dat, subset = delta == 1)
-summary(lm(Y ~ X + Z, data = dat, subset = delta == 1))
 ```
+The two $p$-values differs a bit because the `thlm` returns the Wald $p$-value.
+
+### Reverse survival regression
+```{R}
+summary(thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "rev"))
+```
+
+### Deletion threshold regression
+```{R}
+summary(thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "del", B = 100))
+```
+
+### Complete threshold regression
+```{R}
+summary(thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "com", B = 100))
+```
+
+### All
+The `thlm` function allows `method = "all"` that runs the complete cases analysis, reverse survival regression, deletion threshold regression, and complete threshold regression at once.
+```{R}
+summary(thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "all", B = 100, 
+             control = list(t0.plot = FALSE)))
+```
+
+## Reference

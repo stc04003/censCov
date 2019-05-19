@@ -29,9 +29,9 @@
 #' 
 #' @param formula A formula expression in the form \code{response ~ predictors}.
 #' The response variable is assumed to be fully observed.
-#' The function \code{thlm} can accommodate at most one covaraite subject to independent right censoring. 
-#' The censored covariate is entered as an \code{Surv} object; see \code{survival::Surv} for more detail.
-#' When all the covariates are uncensored, the \code{thlm} function fits the \code{lm} object instead.
+#' The \code{thlm} function can accommodate at most one censored covariate,
+#' which is entered as an \code{Surv} object; see \code{survival::Surv} for more detail.
+#' When all the covariates are uncensored, the \code{thlm} function returns a \code{lm} object.
 #' @param data An optional data frame list or environment contains variables in the \code{formula} and
 #' the \code{subset} argument. If left unspecified, the variables are taken
 #' from \code{environment(formula)}, typically the environment from which \code{thlm} is called.
@@ -41,17 +41,18 @@
 #' The following are permitted:
 #' \describe{
 #'   \item{\code{cc}}{for complete-cases regression}
-#'   \item{\code{rev}}{for reverse survival regression}
-#'   \item{\code{dt}}{for deletion threshold regression}
-#'   \item{\code{ct}}{for complete threshold regression}
+#'   \item{\code{reverse}}{for reverse survival regression}
+#'   \item{\code{deletion-threshold}}{for deletion threshold regression}
+#'   \item{\code{complete-threshold}}{for complete threshold regression}
 #'   \item{\code{all}}{for all four approaches}
 #' }
 #' @param B A numeric value specifies the bootstrap size for estimating
 #' the standard deviation of regression coefficient for the censored
-#' covariate when \code{method = "dt"} or \code{"ct"}.
+#' covariate when \code{method = "deletion-threshold"} or
+#' \code{method = "complete-threshold"}.
 #' When \code{B = 0}, only the beta estimate will be displayed.
 #' @param x.upplim An optional numeric value specifies the upper support
-#' of censored covariate. When left unspecified, the maximum of the
+#' of the censored covariate. When left unspecified, the maximum of the
 #' censored covariate will be used.
 #' @param t0 An optional numeric value specifies the threshold when
 #' \code{method = "dt"} or \code{"ct"}.
@@ -93,29 +94,32 @@
 #' set.seed(0)
 #' dat <- simDat(200)
 #'
+#' library(survival)
 #' ## Falsely assumes all covariates are free of censoring
 #' thlm(Y ~ X + Z, data = dat)
 #' 
 #' ## Complete cases regression
-#' thlm(Y ~ X + Z, cens = delta, data = dat)
-#' thlm(Y ~ X + Z, data = dat, subset = delta == 1) ## same results
+#' thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "cc")
 #' 
 #' ## reverse survival regression
-#' thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "reverse")
+#' thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "rev")
 #' 
 #' ## threshold regression without bootstrap
-#' thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "dt")
-#' thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "ct", control =
+#' thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "del")
+#' thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "com", control =
 #' list(t0.interval = c(0.2, 0.6), t0.plot = FALSE))
 #' 
 #' ## threshold regression with bootstrap
-#' thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "dt", B = 100)
-#' thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "ct", B = 100)
+#' thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "del", B = 100)
+#' thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "com", B = 100)
 #' 
 #' ## display all
 #' thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "all", B = 100)
-thlm <- function(formula, data, subset, method = "cc", B = 0,
+thlm <- function(formula, data, 
+                 method = c("cc", "reverse", "deletion-threshold", "complete-threshold", "all"),
+                 B = 0, subset,
                  x.upplim = NULL, t0 = NULL, control = thlm.control()) {
+    method <- match.arg(method)
     Call <- match.call()
     mnames <- c("", "formula", "data", "subset", "cens")
     cnames <- names(Call)
@@ -149,7 +153,7 @@ thlm <- function(formula, data, subset, method = "cc", B = 0,
             out <- rev.surv.reg(y, u, cens, z)
             method <- "rev"
         }
-        if (method %in% c("deletion", "deletion threshold", "dt")) {
+        if (method %in% c("deletion", "deletion-threshold", "dt")) {
             op2 <- par(mar = c(3.5, 3.5, 2.5, 2.5))
             out <- threshold.reg.m1(y, u, cens, z, x.upplim, t0, control)
             names(out$a2) <- names(out$a2.sd) <- zNames
@@ -157,7 +161,7 @@ thlm <- function(formula, data, subset, method = "cc", B = 0,
             out$a1.sd <- NA
             par(op2)
         }
-        if (method %in% c("complete", "complete threshold", "ct")) {
+        if (method %in% c("complete", "complete-threshold", "ct")) {
             op2 <- par(mar = c(3.5, 3.5, 2.5, 2.5))
             out <- threshold.reg.m2(y, u, cens, z, x.upplim, t0, control)
             names(out$a2) <- names(out$a2.sd) <- zNames
@@ -290,7 +294,7 @@ opt.threshold.m1 <- function(y, u, delta, x.upplim = 1.75, t0.interval = NULL, t
         fit <- loess.smooth(t0.vec, t0.thr, degree = 2)
         lines(fit$x, fit$y, lty = 1, lwd = 2)
         abline(v = t0.opt$maximum, lty = "dotted", lwd = 1.5)
-        legend("topright", c("raw value", "smoothed"), lty = 1:2, bty = "n")
+        legend("topright", c("smoothed", "raw value"), lty = 1:2, bty = "n")
     }
     list(t0.opt = t0.opt$maximum, obj.val = t0.opt$objective)
 }
@@ -377,7 +381,7 @@ opt.threshold.m2 <- function(y, u, delta, x.upplim = 1.75, t0.interval = NULL, t
         fit <- loess.smooth(t0.vec, t0.thr, degree = 2)
         lines(fit$x, fit$y, lty = 1, lwd = 2)
         abline(v = t0.opt$maximum, lty = "dotted", lwd = 1.5)
-        legend("topright", c("raw value", "smoothed"), lty = 1:2, bty = "n")
+        legend("topright", c("smoothed", "raw value"), lty = 1:2, bty = "n")
     }
     list(t0.opt = t0.opt$maximum, obj.val = t0.opt$objective)
 }
