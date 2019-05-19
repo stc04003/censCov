@@ -17,7 +17,7 @@ vignette: >
 ---
 
 ```{r default, include = FALSE}
-knitr::opts_chunk$set(prompt = TRUE, comment = "", collapse = TRUE)
+knitr::opts_chunk$set(prompt = TRUE, comment = "")
 ```
 In this vignette, we demonstrate how to use the `thlm` function in
 __`censCov`__ package to fit linear regression model with censored covariate
@@ -36,7 +36,7 @@ The primary scientific interest is in the parameter $\alpha_1$,
 which captures the association between $Y$ and $X$. 
 The `thlm` function provides 
 
-  1. a test for $H_o: \alpha_1 = 0$ againest its complement;
+  1. a test for $H_o: \alpha_1 = 0$ against its complement;
   2. unbiased estimation of the regression coefficient of the censored covariate.
 
 ## The `thlm` function
@@ -60,7 +60,7 @@ library(survival)
 ```
   - `formula` is a formula expression in the form of `response ~ predictors`. The response variable is assumed to be fully observed. 
   The `thlm` function can accommodate at most one censored covariate, which is entered in the formula as an `Surv` object; 
-  see `survival::Surv` for more detial.
+  see `survival::Surv` for more detail.
   If all the covariates are uncensored, the `thlm` function returns a `lm` object.
   - `data` is an optional data frame, list or environment contains variables in the `formula` and the `subset` argument. If this is left unspecified, the variables are taken from the environment from which `thlm` is called.
   - `method` is a character string specifying the threshold regression methods to be used. The following are permitted:
@@ -79,7 +79,7 @@ library(survival)
   When left unspecified, an optimal threshold will be determined to optimize test power.
   - `control` is a list of threshold parameters including:
     - `t0.interval` controls the end points of the interval to be searched for the optimal threshold when `t0` is left unspecified
-    - `t0.plot` controls whether the objective function will be plotted. When t0.plot is ture, both the raw `t0.plot` values and the smoothed estimates (using local polynomial regression fitting) are plotted.
+    - `t0.plot` controls whether the objective function will be plotted. When t0.plot is true, both the raw `t0.plot` values and the smoothed estimates (using local polynomial regression fitting) are plotted.
 
 ## Illustrative (simulated) data
 We will illustrate the usage of `thlm` with a simulated data that is generated as below:
@@ -96,7 +96,7 @@ simDat <- function(n) {
 set.seed(1)
 head(dat <- simDat(200), 10)
 ```
-The columns in the simulated dataset, `dat`, are
+The columns in the simulated data set, `dat`, are
 
   - `Y` is the response variable
   - `X` is the covariate of interest when `delta = 1` or the right censored value when `delta = 0`
@@ -141,5 +141,40 @@ The `thlm` function allows `method = "all"` that runs the complete cases analysi
 summary(thlm(Y ~ Surv(X, delta) + Z, data = dat, method = "all", B = 100, 
              control = list(t0.plot = FALSE)))
 ```
+
+## FAQ
+
+**Can `thlm` fit model with one censored covariate ($X$) without any fully observed covaraite ($Z$)?**
+
+Yes. For example:
+
+```{R}
+summary(thlm(Y ~ Surv(X, delta), data = dat, method = "all", B = 100, 
+             control = list(t0.plot = FALSE)))
+```
+
+**Can `thlm` fit model with one censored covariate ($X$) and multiple fully observed covaraites ($Z$)?**
+
+Yes. For example:
+
+```{R}
+dat$Z2 <- dat$Z^2
+summary(thlm(Y ~ Surv(X, delta) + Z + Z2, data = dat, method = "all", B = 100, 
+             control = list(t0.plot = FALSE)))
+```
+
+**Does the censored covariate ($X$) need to be specified first in the `formula`?**
+
+Not nesscary. For exmaple:
+
+```{R}
+dat$Z2 <- dat$Z^2
+summary(thlm(Y ~ Z + Surv(X, delta) + Z2, data = dat, method = "all", B = 100, 
+             control = list(t0.plot = FALSE)))
+```
+
+**Can `thlm` fit model with more than one censored covariate ($X$)?**
+
+No.
 
 ## Reference

@@ -301,7 +301,7 @@ div.tocify {
 <h2>Notations</h2>
 <p>Suppose the linear regression model: <span class="math display">\[ Y = \alpha_0 + \alpha_1X + \boldsymbol{\alpha}_2^\top \bf Z + \epsilon, \]</span> where <span class="math inline">\(Y\)</span> is the response variable, <span class="math inline">\(X\)</span> is the covariate of interest which is subject to right censoring, <span class="math inline">\(\bf Z\)</span> is a <span class="math inline">\(p\times 1\)</span> vector of additional covariates that are completely observed, <span class="math inline">\(\epsilon\)</span> is the random error term with mean 0 and finite variance, and the <span class="math inline">\(\alpha\)</span>’s are the corresponding regression coefficients. We assume <span class="math inline">\(epsilon\)</span> is independent of <span class="math inline">\(X\)</span>, <span class="math inline">\(\bf Z\)</span>, and <span class="math inline">\(C\)</span>, where <span class="math inline">\(C\)</span> is the right censoring that potentially censors <span class="math inline">\(X\)</span>. The primary scientific interest is in the parameter <span class="math inline">\(\alpha_1\)</span>, which captures the association between <span class="math inline">\(Y\)</span> and <span class="math inline">\(X\)</span>. The <code>thlm</code> function provides</p>
 <ol style="list-style-type: decimal">
-<li>a test for <span class="math inline">\(H_o: \alpha_1 = 0\)</span> againest its complement;</li>
+<li>a test for <span class="math inline">\(H_o: \alpha_1 = 0\)</span> against its complement;</li>
 <li>unbiased estimation of the regression coefficient of the censored covariate.</li>
 </ol>
 </div>
@@ -313,13 +313,13 @@ div.tocify {
 <pre class="r"><code>&gt; devtools::install_github(&quot;stc04003/censCov&quot;)</code></pre>
 <p>The arguments of the <code>thlm</code> function are as follows:</p>
 <pre class="r"><code>&gt; library(censCov)
-&gt; args(thlm)
-function (formula, data, method = c(&quot;cc&quot;, &quot;reverse&quot;, &quot;deletion-threshold&quot;, 
+&gt; args(thlm)</code></pre>
+<pre><code>function (formula, data, method = c(&quot;cc&quot;, &quot;reverse&quot;, &quot;deletion-threshold&quot;, 
     &quot;complete-threshold&quot;, &quot;all&quot;), B = 0, subset, x.upplim = NULL, 
     t0 = NULL, control = thlm.control()) 
 NULL</code></pre>
 <ul>
-<li><code>formula</code> is a formula expression in the form of <code>response ~ predictors</code>. The response variable is assumed to be fully observed. The <code>thlm</code> function can accommodate at most one censored covariate, which is entered in the formula as an <code>Surv</code> object; see <code>survival::Surv</code> for more detial. If all the covariates are uncensored, the <code>thlm</code> function returns a <code>lm</code> object.</li>
+<li><code>formula</code> is a formula expression in the form of <code>response ~ predictors</code>. The response variable is assumed to be fully observed. The <code>thlm</code> function can accommodate at most one censored covariate, which is entered in the formula as an <code>Surv</code> object; see <code>survival::Surv</code> for more detail. If all the covariates are uncensored, the <code>thlm</code> function returns a <code>lm</code> object.</li>
 <li><code>data</code> is an optional data frame, list or environment contains variables in the <code>formula</code> and the <code>subset</code> argument. If this is left unspecified, the variables are taken from the environment from which <code>thlm</code> is called.</li>
 <li><code>method</code> is a character string specifying the threshold regression methods to be used. The following are permitted:
 <ul>
@@ -336,7 +336,7 @@ NULL</code></pre>
 <li><code>control</code> is a list of threshold parameters including:
 <ul>
 <li><code>t0.interval</code> controls the end points of the interval to be searched for the optimal threshold when <code>t0</code> is left unspecified</li>
-<li><code>t0.plot</code> controls whether the objective function will be plotted. When t0.plot is ture, both the raw <code>t0.plot</code> values and the smoothed estimates (using local polynomial regression fitting) are plotted.</li>
+<li><code>t0.plot</code> controls whether the objective function will be plotted. When t0.plot is true, both the raw <code>t0.plot</code> values and the smoothed estimates (using local polynomial regression fitting) are plotted.</li>
 </ul></li>
 </ul>
 </div>
@@ -353,8 +353,8 @@ NULL</code></pre>
 +   data.frame(Y = Y, X = X, Z = Z, delta = delta)
 + }
 &gt; set.seed(1)
-&gt; head(dat &lt;- simDat(200), 10)
-            Y          X        Z delta
+&gt; head(dat &lt;- simDat(200), 10)</code></pre>
+<pre><code>            Y          X        Z delta
 1  -1.4004305 0.25172728 5.432294     1
 2  -0.6842887 0.39388093 3.359654     1
 3  -0.5541144 0.04856891 1.545505     1
@@ -365,7 +365,7 @@ NULL</code></pre>
 8  -2.5030175 0.17989428 5.183661     1
 9   0.6904316 0.31885583 1.355770     1
 10 -1.4071626 0.04901533 4.513894     1</code></pre>
-<p>The columns in the simulated dataset, <code>dat</code>, are</p>
+<p>The columns in the simulated data set, <code>dat</code>, are</p>
 <ul>
 <li><code>Y</code> is the response variable</li>
 <li><code>X</code> is the covariate of interest when <code>delta = 1</code> or the right censored value when <code>delta = 0</code></li>
@@ -380,15 +380,15 @@ NULL</code></pre>
 <div id="complete-cases" class="section level3">
 <h3>Complete cases</h3>
 <p>When <code>method = &quot;cc&quot;</code>, <code>thlm</code> removes rows with <code>delta = 0</code> and fits the linear model via <code>lm</code>.</p>
-<pre class="r"><code>&gt; thlm(Y ~ Surv(X, delta) + Z, data = dat, method = &quot;cc&quot;)
-
+<pre class="r"><code>&gt; thlm(Y ~ Surv(X, delta) + Z, data = dat, method = &quot;cc&quot;)</code></pre>
+<pre><code>
  Call: thlm(formula = Y ~ Surv(X, delta) + Z, data = dat, method = &quot;cc&quot;)
 
  Hypothesis test of association
 H0: a1 = 0, p-value = 0.1028 </code></pre>
 <p>or</p>
-<pre class="r"><code>&gt; thlm(Y ~ X + Z, data = dat, subset = delta == 1)
-
+<pre class="r"><code>&gt; thlm(Y ~ X + Z, data = dat, subset = delta == 1)</code></pre>
+<pre><code>
  Call: thlm(formula = Y ~ X + Z, data = dat, subset = delta == 1)
 
  Hypothesis test of association
@@ -397,8 +397,8 @@ H0: a1 = 0, p-value = 0.1028 </code></pre>
 </div>
 <div id="reverse-survival-regression" class="section level3">
 <h3>Reverse survival regression</h3>
-<pre class="r"><code>&gt; summary(thlm(Y ~ Surv(X, delta) + Z, data = dat, method = &quot;rev&quot;))
-Call:
+<pre class="r"><code>&gt; summary(thlm(Y ~ Surv(X, delta) + Z, data = dat, method = &quot;rev&quot;))</code></pre>
+<pre><code>Call:
 thlm(formula = Y ~ Surv(X, delta) + Z, data = dat, method = &quot;rev&quot;)
 
  Reverse survival regression
@@ -455,8 +455,8 @@ Under the assumption that X is independent of Z given X*. See ?thlm for more det
 <h3>All</h3>
 <p>The <code>thlm</code> function allows <code>method = &quot;all&quot;</code> that runs the complete cases analysis, reverse survival regression, deletion threshold regression, and complete threshold regression at once.</p>
 <pre class="r"><code>&gt; summary(thlm(Y ~ Surv(X, delta) + Z, data = dat, method = &quot;all&quot;, B = 100, 
-+              control = list(t0.plot = FALSE)))
-Call:
++              control = list(t0.plot = FALSE)))</code></pre>
+<pre><code>Call:
 thlm(formula = Y ~ Surv(X, delta) + Z, data = dat, method = &quot;all&quot;, 
     B = 100, control = list(t0.plot = FALSE))
 
@@ -499,6 +499,146 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Under the assumption that X is independent of Z given X*. See ?thlm for more detail.</code></pre>
 </div>
+</div>
+<div id="faq" class="section level2">
+<h2>FAQ</h2>
+<p><strong>Can <code>thlm</code> fit model with one censored covariate (<span class="math inline">\(X\)</span>) without any fully observed covaraite (<span class="math inline">\(Z\)</span>)?</strong></p>
+<p>Yes. For example:</p>
+<pre class="r"><code>&gt; summary(thlm(Y ~ Surv(X, delta), data = dat, method = &quot;all&quot;, B = 100, 
++              control = list(t0.plot = FALSE)))</code></pre>
+<pre><code>Call:
+thlm(formula = Y ~ Surv(X, delta), data = dat, method = &quot;all&quot;, 
+    B = 100, control = list(t0.plot = FALSE))
+
+Complete-case regression
+
+ Coefficients:
+  Estimate  StdErr z.value p.value
+X  0.10360 0.30109  0.3441  0.7308
+
+Reverse survival regression
+
+ Coefficients:
+   Estimate    StdErr z.value p.value
+Y -0.059851  0.076203 -0.7854  0.4322
+
+Deletion threshold regression
+ Optimal threshold is 0.394
+ Coefficients:
+     Estimate  StdErr z.value p.value
+a1:X  0.49723 0.34765  1.4303  0.1526
+b1:X  0.23753 0.16906  1.4051  0.1600
+
+Complete threshold regression
+ Optimal threshold is 0.481
+ Coefficients:
+     Estimate   StdErr z.value p.value
+a1:X 0.082171 0.363501  0.2261  0.8212
+b1:X 0.041426 0.196624  0.2107  0.8331
+
+Under the assumption that X is independent of Z given X*. See ?thlm for more detail.</code></pre>
+<p><strong>Can <code>thlm</code> fit model with one censored covariate (<span class="math inline">\(X\)</span>) and multiple fully observed covaraites (<span class="math inline">\(Z\)</span>)?</strong></p>
+<p>Yes. For example:</p>
+<pre class="r"><code>&gt; dat$Z2 &lt;- dat$Z^2
+&gt; summary(thlm(Y ~ Surv(X, delta) + Z + Z2, data = dat, method = &quot;all&quot;, B = 100, 
++              control = list(t0.plot = FALSE)))</code></pre>
+<pre><code>Call:
+thlm(formula = Y ~ Surv(X, delta) + Z + Z2, data = dat, method = &quot;all&quot;, 
+    B = 100, control = list(t0.plot = FALSE))
+
+Complete-case regression
+
+ Coefficients:
+    Estimate    StdErr z.value  p.value   
+X   0.350485  0.212926  1.6460 0.099754 . 
+Z  -0.608191  0.216904 -2.8040 0.005048 **
+Z2  0.011590  0.030151  0.3844 0.700687   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Reverse survival regression
+
+ Coefficients:
+  Estimate   StdErr z.value p.value  
+Y -0.18087  0.10079 -1.7946 0.07272 .
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Deletion threshold regression
+ Optimal threshold is 0.394
+ Coefficients:
+       Estimate    StdErr z.value  p.value   
+a1:X   0.654823  0.253949  2.5786 0.009921 **
+a2:Z  -0.623451  0.211023 -2.9544 0.003132 **
+a3:Z2  0.013604  0.029366  0.4633 0.643169   
+b1:X   0.312817  0.118646  2.6366 0.008375 **
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Complete threshold regression
+ Optimal threshold is 0.481
+ Coefficients:
+        Estimate     StdErr z.value  p.value   
+a1:X   0.3745097  0.2656319  1.4099 0.158575   
+a2:Z  -0.5685414  0.1997397 -2.8464 0.004422 **
+a3:Z2  0.0066448  0.0277542  0.2394 0.810784   
+b1:X   0.1888058  0.1396247  1.3522 0.176299   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Under the assumption that X is independent of Z given X*. See ?thlm for more detail.</code></pre>
+<p><strong>Does the censored covariate (<span class="math inline">\(X\)</span>) need to be specified first in the <code>formula</code>?</strong></p>
+<p>Not nesscary. For exmaple:</p>
+<pre class="r"><code>&gt; dat$Z2 &lt;- dat$Z^2
+&gt; summary(thlm(Y ~ Z + Surv(X, delta) + Z2, data = dat, method = &quot;all&quot;, B = 100, 
++              control = list(t0.plot = FALSE)))</code></pre>
+<pre><code>Call:
+thlm(formula = Y ~ Z + Surv(X, delta) + Z2, data = dat, method = &quot;all&quot;, 
+    B = 100, control = list(t0.plot = FALSE))
+
+Complete-case regression
+
+ Coefficients:
+    Estimate    StdErr z.value  p.value   
+X   0.350485  0.212926  1.6460 0.099754 . 
+Z  -0.608191  0.216904 -2.8040 0.005048 **
+Z2  0.011590  0.030151  0.3844 0.700687   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Reverse survival regression
+
+ Coefficients:
+  Estimate   StdErr z.value p.value  
+Y -0.18087  0.10079 -1.7946 0.07272 .
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Deletion threshold regression
+ Optimal threshold is 0.394
+ Coefficients:
+       Estimate    StdErr z.value  p.value   
+a1:X   0.654823  0.274355  2.3868 0.016997 * 
+a2:Z  -0.623451  0.211023 -2.9544 0.003132 **
+a3:Z2  0.013604  0.029366  0.4633 0.643169   
+b1:X   0.312817  0.118646  2.6366 0.008375 **
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Complete threshold regression
+ Optimal threshold is 0.481
+ Coefficients:
+        Estimate     StdErr z.value  p.value   
+a1:X   0.3745097  0.2989135  1.2529 0.210241   
+a2:Z  -0.5685414  0.1997397 -2.8464 0.004422 **
+a3:Z2  0.0066448  0.0277542  0.2394 0.810784   
+b1:X   0.1888058  0.1396247  1.3522 0.176299   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Under the assumption that X is independent of Z given X*. See ?thlm for more detail.</code></pre>
+<p><strong>Can <code>thlm</code> fit model with more than one censored covariate (<span class="math inline">\(X\)</span>)?</strong></p>
+<p>No.</p>
 </div>
 <div id="reference" class="section level2 unnumbered">
 <h2>Reference</h2>
