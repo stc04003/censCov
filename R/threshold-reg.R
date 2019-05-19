@@ -68,7 +68,7 @@
 #' }
 #'
 #' @importFrom stats approx coef ecdf lm model.extract model.matrix optimize printCoefmat
-#' @importFrom stats loess.smooth pnorm qnorm runif sd
+#' @importFrom stats loess.smooth pnorm qnorm runif sd complete.cases
 #' @importFrom survival survfit coxph Surv
 #' @importFrom graphics abline legend lines mtext par plot title
 #' 
