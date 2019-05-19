@@ -40,7 +40,7 @@ devtools::install_github("stc04003/censCov")
 ```
 
 ### Getting Started
-The package [vignette](https://www.sychiou.com/censCov/index.html) provides a quick demonstration for the basic usage of the main functions.
+The package [vignette](https://www.sychiou.com/censCov/articles/censCov-examples.html) provides a quick demonstration for the basic usage of the main functions.
 
 ### References:
 
