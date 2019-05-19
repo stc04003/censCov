@@ -144,7 +144,6 @@ thlm <- function(formula, data,
         u <- as.data.frame(tmp)$time
         z <- as.matrix(tmp[, attr(tmp, "dimnames")[[2]] == ""][,-1])
         if (method %in% c("cc", "complete cases")) {
-            ## out <- lm(formula, subset = cens == 1)
             out <- cc.reg(y, u, cens, z)
             names(out$a2) <- names(out$a2.sd) <- zNames
             method <- "clm"

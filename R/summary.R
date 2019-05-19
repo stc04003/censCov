@@ -169,6 +169,4 @@ print.thlm <- function(x, ...) {
         }
     }
     cat("\n")
-    ## cat("\nCall:\n")
-    ## print(x$Call)
 }
