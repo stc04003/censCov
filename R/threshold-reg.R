@@ -142,7 +142,8 @@ thlm <- function(formula, data,
         tmp <- do.call(cbind, sapply(1:ncol(obj), function(x) as.matrix(obj[,x])))
         cens <- as.data.frame(tmp)$status
         u <- as.data.frame(tmp)$time
-        z <- as.matrix(tmp[, attr(tmp, "dimnames")[[2]] == ""][,-1])
+        z <- as.matrix(tmp[, attr(tmp, "dimnames")[[2]] == "", drop = FALSE][,-1])
+        if (NCOL(z) == 0) z <- matrix(0, length(u))
         if (method %in% c("cc", "complete cases")) {
             out <- cc.reg(y, u, cens, z)
             names(out$a2) <- names(out$a2.sd) <- zNames
@@ -192,7 +193,7 @@ thlm <- function(formula, data,
             bp.id <- sample(1:n, n, replace = TRUE)
             y.bp <- y[bp.id]
             u.bp <- u[bp.id]
-            z.bp <- as.matrix(z[bp.id,])
+            z.bp <- z[bp.id, , drop = FALSE]## as.matrix(z[bp.id,])
             delta.bp <- cens[bp.id]
             temp <- diff(sort(u.bp))
             temp2 <- sort(temp[temp>0])
@@ -218,7 +219,7 @@ thlm <- function(formula, data,
     }
     out$method <- method
     out$Call <- Call
-    out$names <- all.vars(formula)[-(atSurv + 1)] # Y, X, Z1, Z2, ...
+    out$names <- all.vars(formula)[-(atSurv + 1)][c(1, atSurv, (1:length(nSurv))[-c(1, atSurv)])] # Y, X, Z1, Z2, ...
     out$B <- B
     class(out) <- "thlm"
     return(out)

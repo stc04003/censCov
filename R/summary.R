@@ -14,6 +14,7 @@ summary.thlm <- function(object, ...) {
                                    StdErr = c(object$a1.sd, object$a2.sd)))
         tab$z.value <- tab$Estimate / tab$StdErr
         tab$p.value <- with(tab, 2 * pnorm(-abs(Estimate) / StdErr))
+        if (any(is.na(object$cc))) tab$cc <- tab$cc[complete.cases(tab$cc),]
         rownames(tab) <- object$names[-1]
         tab <- round(tab, 7)
     }
@@ -26,14 +27,21 @@ summary.thlm <- function(object, ...) {
         tab <- round(tab, 7)
     }
     if (object$method %in% c("dt", "ct")) {
-        tab <- as.data.frame(cbind(Estimate = c(object$a1, object$a2, object$b1),
-                                   StdErr = c(object$a1.sd, object$a2.sd, object$b1.sd)))
+        if (length(object$a2.sd) == 0) {
+            tab <- data.frame(Estimate = c(object$a1, object$b1),
+                              StdErr = c(object$a1.sd, object$b1.sd))
+            rownames(tab) <- c(paste("a1:", object$names[2], sep = ""),
+                               paste("b1:", object$names[2], sep = ""))
+        } else {            
+            tab <- data.frame(Estimate = c(object$a1, object$a2, object$b1),
+                              StdErr = c(object$a1.sd, object$a2.sd, object$b1.sd))
+            rownames(tab) <- c(paste("a1:", object$names[2], sep = ""),
+                               sapply(3:length(object$names),
+                                      function(y) paste("a", y-1, ":", object$names[y], sep = "")),
+                               paste("b1:", object$names[2], sep = ""))
+        }
         tab$z.value <- tab$Estimate / tab$StdErr
         tab$p.value <- with(tab, 2 * pnorm(-abs(Estimate) / StdErr))
-        rownames(tab) <- c(paste("a1:", object$names[2], sep = ""),
-                           sapply(3:length(object$names),
-                                  function(y) paste("a", y-1, ":", object$names[y], sep = "")),
-                           paste("b1:", object$names[2], sep = ""))
         tab <- round(tab, 7)
     }
     if (object$method == "all") {
@@ -43,31 +51,42 @@ summary.thlm <- function(object, ...) {
                                       StdErr = c(object$cc$a1.sd, object$cc$a2.sd)))
         tab$cc$z.value <- tab$cc$Estimate / tab$cc$StdErr
         tab$cc$p.value <- with(tab$cc, 2 * pnorm(-abs(Estimate) / StdErr))
+        if (any(is.na(object$cc))) tab$cc <- tab$cc[complete.cases(tab$cc),]
         rownames(tab$cc) <- object$names[-1]
         ## reverse survival regression
         tab$rev <- as.data.frame(cbind(Estimate = object$rev$a1, StdErr = object$rev$a1.sd,
                                        z.value = object$rev$a1 / object$rev$a1.sd,
                                        p.value = 2 * pnorm(-abs(object$rev$a1) / object$rev$a1.sd)))
         rownames(tab$rev) <- object$names[1]
-        ## deletion threshold
-        tab$dt <- as.data.frame(cbind(Estimate = c(object$dt$a1, object$dt$a2, object$dt$b1),
-                                   StdErr = c(object$dt$a1.sd, object$dt$a2.sd, object$dt$b1.sd)))
+        ## deletion threshold & complete threshold
+        if (length(object$dt$a2.sd) == 0) {
+            tab$dt <- data.frame(Estimate = c(object$dt$a1, object$dt$b1),
+                                 StdErr = c(object$dt$a1.sd, object$dt$b1.sd))
+            rownames(tab$dt) <- c(paste("a1:", object$names[2], sep = ""),
+                                  paste("b1:", object$names[2], sep = ""))
+            tab$ct <- data.frame(Estimate = c(object$ct$a1, object$ct$b1),
+                                 StdErr = c(object$ct$a1.sd, object$ct$b1.sd))
+            rownames(tab$ct) <- c(paste("a1:", object$names[2], sep = ""),
+                                  paste("b1:", object$names[2], sep = ""))
+        } else {            
+            tab$dt <- data.frame(Estimate = c(object$dt$a1, object$dt$a2, object$dt$b1),
+                                 StdErr = c(object$dt$a1.sd, object$dt$a2.sd, object$dt$b1.sd))
+            rownames(tab$dt) <- c(paste("a1:", object$names[2], sep = ""),
+                                  sapply(3:length(object$names),
+                                         function(y) paste("a", y-1, ":", object$names[y], sep = "")),
+                                  paste("b1:", object$names[2], sep = ""))
+            tab$ct <- data.frame(Estimate = c(object$ct$a1, object$ct$a2, object$ct$b1),
+                                 StdErr = c(object$ct$a1.sd, object$ct$a2.sd, object$ct$b1.sd))
+            rownames(tab$ct) <- c(paste("a1:", object$names[2], sep = ""),
+                                  sapply(3:length(object$names),
+                                         function(y) paste("a", y-1, ":", object$names[y], sep = "")),
+                                  paste("b1:", object$names[2], sep = ""))
+        }
         tab$dt$z.value <- tab$dt$Estimate / tab$dt$StdErr
         tab$dt$p.value <- with(tab$dt, 2 * pnorm(-abs(Estimate) / StdErr))
-        rownames(tab$dt) <- c(paste("a1:", object$names[2], sep = ""),
-                              sapply(3:length(object$names),
-                                     function(y) paste("a", y-1, ":", object$names[y], sep = "")),
-                              paste("b1:", object$names[2], sep = ""))
         object$threshold$dt <- object$dt$threshold
-        ## complete threshold
-        tab$ct <- as.data.frame(cbind(Estimate = c(object$ct$a1, object$ct$a2, object$ct$b1),
-                                   StdErr = c(object$ct$a1.sd, object$ct$a2.sd, object$ct$b1.sd)))
         tab$ct$z.value <- tab$ct$Estimate / tab$ct$StdErr
         tab$ct$p.value <- with(tab$ct, 2 * pnorm(-abs(Estimate) / StdErr))
-        rownames(tab$ct) <- c(paste("a1:", object$names[2], sep = ""),
-                              sapply(3:length(object$names),
-                                     function(y) paste("a", y-1, ":", object$names[y], sep = "")),
-                              paste("b1:", object$names[2], sep = ""))
         object$threshold$ct <- object$ct$threshold
         tab$cc <- round(tab$cc, 7)
         tab$rev <- round(tab$rev, 7)
