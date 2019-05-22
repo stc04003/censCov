@@ -44,7 +44,7 @@ The `thlm` function presents the threshold regression approaches for linear regr
 The threshold regression methods allow for immediate testing of the significance of the effect of a censored covariate.
 The __`censCov`__ package can be installed from CRAN with 
 ```{R, eval = FALSE}
-install.packages("devtools")
+install.packages("censCov")
 ```
 or from GitHub with
 ```{R, eval = FALSE}
